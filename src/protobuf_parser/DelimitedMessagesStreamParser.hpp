@@ -1,12 +1,9 @@
-/*
- * DelimitedMessagesStreamParser.hpp
- *
- *  Created on: 2 Feb 2023
- *      Author: sia
- */
+#pragma once
 
-#ifndef SRC_PROTOBUF_PARSER_DELIMITEDMESSAGESSTREAMPARSER_HPP_
-#define SRC_PROTOBUF_PARSER_DELIMITEDMESSAGESSTREAMPARSER_HPP_
+#include <list>
+#include <string>
+#include <memory>
+#include <vector>
 
 template <typename MessageType>
 class DelimitedMessagesStreamParser
@@ -20,4 +17,3 @@ class DelimitedMessagesStreamParser
   std::vector<char> m_buffer;
 };
 
-#endif /* SRC_PROTOBUF_PARSER_DELIMITEDMESSAGESSTREAMPARSER_HPP_ */
