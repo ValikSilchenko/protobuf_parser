@@ -34,15 +34,20 @@ template <typename Message>
 std::shared_ptr<Message> parseDelimited(const void* data, size_t size,
                                         size_t* bytesConsumed = nullptr)
 {
-    if (data)
+    if (data && size > sizeof(uint32_t))
     {
         const char* charData = static_cast<const char*>(data);
         char* message;
-        uint32_t intSize;
-        memcpy(&intSize, data, sizeof(uint32_t));
+        uint32_t messageSize;
+        memcpy(&messageSize, data, sizeof(uint32_t));
 
-        message = new char[intSize];
-        for (int byte = 0; byte < intSize; byte++)
+        if (size < sizeof(uint32_t) + messageSize)
+        {
+            return nullptr;
+        }
+
+        message = new char[messageSize];
+        for (int byte = 0; byte < messageSize; byte++)
         {
             message[byte] = charData[sizeof(uint32_t) + byte];
         }
@@ -52,7 +57,7 @@ std::shared_ptr<Message> parseDelimited(const void* data, size_t size,
 
         if (bytesConsumed)
         {
-            *bytesConsumed = sizeof(uint32_t) + intSize;
+            *bytesConsumed = sizeof(uint32_t) + messageSize;
         }
 
         delete [] message;
