@@ -18,13 +18,15 @@ template <typename Message>
 PointerToConstData serializeDelimited(const Message& msg)
 {
     uint32_t messageSize = sizeof(msg);
-    char sizeInBytes[sizeof(uint32_t)];
-    memcpy(sizeInBytes, &messageSize, sizeof(uint32_t));
+    char msgInBytes[sizeof(uint32_t) + sizeof(msg)];
+    memcpy(msgInBytes, &messageSize, sizeof(uint32_t));
+    memcpy(msgInBytes + sizeof(uint32_t), msg.SerializeAsString().c_str(), messageSize);
 
-    std::string serializedMsg(sizeInBytes);
-    serializedMsg += msg.SerializeAsString();
-
-    Data data(serializedMsg.begin(), serializedMsg.end());
+    Data data(sizeof(uint32_t) + sizeof(msg));
+    for (int i = 0; i < sizeof(uint32_t) + sizeof(msg); i++)
+    {
+        data[i] = msgInBytes[i];
+    }
 
     PointerToConstData result = std::make_shared<const Data>(data);
 
