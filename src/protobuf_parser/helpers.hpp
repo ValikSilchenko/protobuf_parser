@@ -14,7 +14,22 @@
 typedef std::vector<char> Data;
 typedef std::shared_ptr<const Data> PointerToConstData;
 
-template <typename Message> PointerToConstData serializeDelimited(const Message& msg) { return nullptr; }
+template <typename Message>
+PointerToConstData serializeDelimited(const Message& msg)
+{
+    uint32_t messageSize = sizeof(msg);
+    char sizeInBytes[sizeof(uint32_t)];
+    memcpy(sizeInBytes, &messageSize, sizeof(uint32_t));
+
+    std::string serializedMsg(sizeInBytes);
+    serializedMsg += msg.SerializeAsString();
+
+    Data data(serializedMsg.begin(), serializedMsg.end());
+
+    PointerToConstData result = std::make_shared<const Data>(data);
+
+    return result;
+}
 
 /*!
  * \brief Расшифровывает сообщение, предваренное длиной из массива байтов.
