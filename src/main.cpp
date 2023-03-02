@@ -1,29 +1,35 @@
 #include "util/pr.pb.h"
-#include "protobuf_parser/helpers.hpp"
+#include "protobuf_parser/DelimitedMessagesStreamParser.h"
 #include <iostream>
 
 int main() {
     TestTask::Messages::WrapperMessage message;
-    auto request = new TestTask::Messages::RequestForSlowResponse;
-    request->set_time_in_seconds_to_sleep(12);
-    message.set_allocated_request_for_slow_response(request);
+    TestTask::Messages::RequestForSlowResponse* request;
 
-    std::cout << message.DebugString() << "\n\n";
-
-    std::shared_ptr<const Data> data = serializeDelimited<TestTask::Messages::WrapperMessage>(message);
-    char* msg = new char[data->size()];
-    for (int i = 0; i < data->size(); i++)
+    std::string data;
+    char msg[60];
+    std::shared_ptr<const Data> pointerToMsg;
+    for (int i = 0; i < 5; i++)
     {
-        msg[i] = (*data)[i];
+        request = new TestTask::Messages::RequestForSlowResponse;
+        request->set_time_in_seconds_to_sleep(3 * i);
+        message.set_allocated_request_for_slow_response(request);
+        pointerToMsg = serializeDelimited<TestTask::Messages::WrapperMessage>(message);
+        for (int j = 0; j < pointerToMsg->size(); j++)
+        {
+            data.push_back((*pointerToMsg)[j]);
+        }
     }
-    std::shared_ptr<TestTask::Messages::WrapperMessage> res = parseDelimited<TestTask::Messages::WrapperMessage>(msg, data->size());
 
-    if (res)
+    std::list<DelimitedMessagesStreamParser<TestTask::Messages::WrapperMessage>::PointerToConstValue> list;
+
+    DelimitedMessagesStreamParser<TestTask::Messages::WrapperMessage> parser;
+    list = parser.parse(data);
+
+    for (const auto& pointer : list)
     {
-        TestTask::Messages::WrapperMessage response = *(res);
-        std::cout << response.DebugString() << "\n\n";
+        std::cout << (*pointer).DebugString() << "\n";
     }
-    delete [] msg;
 
     return 0;
 }

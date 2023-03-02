@@ -58,8 +58,12 @@ std::shared_ptr<Message> parseDelimited(const void* data, size_t size,
         uint32_t messageSize;
         memcpy(&messageSize, data, sizeof(uint32_t));
 
-        if (size < sizeof(uint32_t) + messageSize)
+        if (messageSize == 0 || size < sizeof(uint32_t) + messageSize)
         {
+            if (bytesConsumed)
+            {
+                *bytesConsumed = 0;
+            }
             return nullptr;
         }
 
@@ -80,6 +84,11 @@ std::shared_ptr<Message> parseDelimited(const void* data, size_t size,
         delete [] message;
 
         return result;
+    }
+
+    if (bytesConsumed)
+    {
+        *bytesConsumed = 0;
     }
     return nullptr;
 }
