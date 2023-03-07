@@ -1,4 +1,4 @@
-#include "util/pr.pb.h"
+#include "proto/pr.pb.h"
 #include "protobuf_parser/DelimitedMessagesStreamParser.h"
 #include <iostream>
 
@@ -7,7 +7,6 @@ int main() {
     TestTask::Messages::RequestForSlowResponse* request;
 
     std::string data;
-    char msg[60];
     std::shared_ptr<const Data> pointerToMsg;
     for (int i = 0; i < 5; i++)
     {
