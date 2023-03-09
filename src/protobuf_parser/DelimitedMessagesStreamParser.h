@@ -19,21 +19,46 @@ class DelimitedMessagesStreamParser
 
  private:
     std::vector<char> m_buffer;
+
+    void addToBuffer(const std::string& data);
+    void removeMessageFromBuffer(size_t msgSize);
 };
 
 template<typename MessageType>
 std::list<typename DelimitedMessagesStreamParser<MessageType>::PointerToConstValue> DelimitedMessagesStreamParser<MessageType>::parse(const std::string &data)
 {
-    std::list<PointerToConstValue> result;
+    addToBuffer(data);
 
-    int startIndex = 0;
-    size_t consumedBytes = -1;
-    while (consumedBytes != 0)
+    std::list<PointerToConstValue> msgsList;
+
+    std::shared_ptr<MessageType> parsedMsg = std::make_shared<MessageType>(MessageType());
+    size_t consumedBytes;
+    while (parsedMsg.get() != nullptr)
     {
-        result.push_back(parseDelimited<MessageType>(data.substr(startIndex).c_str(), data.substr(startIndex).size(), &consumedBytes));
-        startIndex += static_cast<int>(consumedBytes);
+        parsedMsg = parseDelimited<MessageType>(static_cast<const void*>(&m_buffer), m_buffer.size(), &consumedBytes);
+        if (parsedMsg.get())
+        {
+            msgsList.push_back(parsedMsg);
+            removeMessageFromBuffer(consumedBytes);
+        }
     }
 
-    return result;
+    return msgsList;
+}
+
+template<typename MessageType>
+void DelimitedMessagesStreamParser<MessageType>::addToBuffer(const std::string& data) {
+    for (char sym : data)
+    {
+        m_buffer.push_back(sym);
+    }
+}
+
+template<typename MessageType>
+void DelimitedMessagesStreamParser<MessageType>::removeMessageFromBuffer(size_t msgSize) {
+    for (int i = 0; i < msgSize; i++)
+    {
+        m_buffer.erase(m_buffer.cbegin());
+    }
 }
 

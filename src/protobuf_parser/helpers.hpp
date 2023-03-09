@@ -53,10 +53,17 @@ std::shared_ptr<Message> parseDelimited(const void* data, size_t size,
 {
     if (data && size > sizeof(uint32_t))
     {
-        const char* charData = static_cast<const char*>(data);
+        const Data* dataVec = static_cast<const Data*>(data);
         char* message;
+        char buffer[sizeof(uint32_t)];
+
+        for (int i = 0; i < 4; i++)
+        {
+            buffer[i] = dataVec->at(i);
+        }
+
         uint32_t messageSize;
-        memcpy(&messageSize, data, sizeof(uint32_t));
+        memcpy(&messageSize, buffer, sizeof(uint32_t));
 
         if (messageSize == 0 || size < sizeof(uint32_t) + messageSize)
         {
@@ -70,7 +77,7 @@ std::shared_ptr<Message> parseDelimited(const void* data, size_t size,
         message = new char[messageSize];
         for (int byte = 0; byte < messageSize; byte++)
         {
-            message[byte] = charData[sizeof(uint32_t) + byte];
+            message[byte] = dataVec->at(sizeof(uint32_t) + byte);
         }
 
         std::shared_ptr<Message> result = std::make_shared<Message>(Message());
