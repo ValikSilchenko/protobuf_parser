@@ -5,7 +5,7 @@ project(test_parser)
 set(CMAKE_CXX_STANDARD 14)
 
 include(CTest)
-
+add_test(test ${EXECUTABLE_OUTPUT_PATH}/test_parser)
 add_executable(test_parser
         run_tests.cpp
         Test_DelimitedMessagesStreamParser.cpp
