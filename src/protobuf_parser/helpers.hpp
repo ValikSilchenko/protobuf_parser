@@ -53,7 +53,7 @@ std::shared_ptr<Message> parseDelimited(const void* data, size_t size,
 {
     if (data && size > sizeof(uint32_t))
     {
-        const Data* dataVec = static_cast<const Data*>(data);
+        auto dataVec = static_cast<const Data*>(data);
         char* message;
         char buffer[sizeof(uint32_t)];
 
@@ -87,9 +87,7 @@ std::shared_ptr<Message> parseDelimited(const void* data, size_t size,
         {
             *bytesConsumed = sizeof(uint32_t) + messageSize;
         }
-
         delete [] message;
-
         return result;
     }
 

@@ -12,7 +12,7 @@ TEST(ParserTests, test_parsing_with_full_msg)
 
     std::string data;
     std::shared_ptr<const Data> pointerToMsg;
-    std::list<DelimitedMessagesStreamParser<TestTask::Messages::WrapperMessage>::PointerToConstValue> list;
+    DelimitedMessagesStreamParser<TestTask::Messages::WrapperMessage>::ParsedMsgsList list;
     DelimitedMessagesStreamParser<TestTask::Messages::WrapperMessage> parser;
 
     for (int i = 0; i < 5; i++)
@@ -47,7 +47,7 @@ TEST(ParserTests, test_parsing_with_part_of_msg)
 
     std::string data;
     std::shared_ptr<const Data> pointerToMsg;
-    std::list<DelimitedMessagesStreamParser<TestTask::Messages::WrapperMessage>::PointerToConstValue> list;
+    DelimitedMessagesStreamParser<TestTask::Messages::WrapperMessage>::ParsedMsgsList list;
     DelimitedMessagesStreamParser<TestTask::Messages::WrapperMessage> parser;
 
     request = new TestTask::Messages::RequestForSlowResponse;

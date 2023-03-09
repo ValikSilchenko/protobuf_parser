@@ -14,8 +14,9 @@ class DelimitedMessagesStreamParser
     DelimitedMessagesStreamParser() = default;
 
     typedef std::shared_ptr<const MessageType> PointerToConstValue;
+    typedef std::list<PointerToConstValue> ParsedMsgsList;
 
-    std::list<PointerToConstValue> parse(const std::string& data);
+    ParsedMsgsList parse(const std::string& data);
 
  private:
     std::vector<char> m_buffer;
@@ -25,14 +26,15 @@ class DelimitedMessagesStreamParser
 };
 
 template<typename MessageType>
-std::list<typename DelimitedMessagesStreamParser<MessageType>::PointerToConstValue> DelimitedMessagesStreamParser<MessageType>::parse(const std::string &data)
-{
+typename DelimitedMessagesStreamParser<MessageType>::ParsedMsgsList DelimitedMessagesStreamParser<MessageType>::parse(
+        const std::string &data
+      ) {
     addToBuffer(data);
 
     std::list<PointerToConstValue> msgsList;
-
     std::shared_ptr<MessageType> parsedMsg = std::make_shared<MessageType>(MessageType());
     size_t consumedBytes;
+
     while (parsedMsg.get() != nullptr)
     {
         parsedMsg = parseDelimited<MessageType>(static_cast<const void*>(&m_buffer), m_buffer.size(), &consumedBytes);
