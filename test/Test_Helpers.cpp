@@ -1,53 +1,64 @@
+#include <gtest/gtest.h>
 #include "protobuf_parser/helpers.hpp"
-#include "util/pr.pb.h"
+#include "proto/pr.pb.h"
 
-void testParsing()
+
+TEST(HelpersTests, test_serialize_and_parsing_full_msg)
 {
+    int testNum = 12;
+    std::string serializedMessage;
+
     TestTask::Messages::WrapperMessage message;
+    TestTask::Messages::WrapperMessage response;
+    std::shared_ptr<TestTask::Messages::WrapperMessage> res;
+    std::shared_ptr<const Data> data;
     auto request = new TestTask::Messages::RequestForSlowResponse;
-    request->set_time_in_seconds_to_sleep(12);
+
+    request->set_time_in_seconds_to_sleep(testNum);
     message.set_allocated_request_for_slow_response(request);
 
-    std::cout << message.DebugString() << "\n\n";
+    uint32_t msgSize = sizeof(message);
+    data = serializeDelimited(message);
 
-    char data[100];
-    uint32_t size = sizeof(message);
-    memcpy(data, &size, sizeof(uint32_t));
-    std::string serializedMessage;
-    message.SerializeToString(&serializedMessage);
-    for (int i = 0; i < serializedMessage.size(); i++)
-    {
-        data[sizeof(uint32_t) + i] = serializedMessage[i];
-    }
-    std::shared_ptr<TestTask::Messages::WrapperMessage> res = parseDelimited<TestTask::Messages::WrapperMessage>(data, 100);
+    size_t bytesConsumed;
+    res = parseDelimited<TestTask::Messages::WrapperMessage>(static_cast<const void*>(&*data), data->size(), &bytesConsumed);
+    ASSERT_TRUE(res.get() != nullptr);
+    ASSERT_EQ(bytesConsumed, msgSize + sizeof(uint32_t));
+    response = *res;
 
-    TestTask::Messages::WrapperMessage response = *(res);
-    std::cout << response.DebugString() << "\n\n";
+    ASSERT_TRUE(response.has_request_for_slow_response());
+    ASSERT_EQ(response.request_for_slow_response().time_in_seconds_to_sleep(), testNum);
 }
 
-void testSerializing()
+TEST(HelpersTests, test_serialize_and_parsing_msg_by_parts)
 {
+    int testNum = 12;
+    std::string serializedMessage;
+
     TestTask::Messages::WrapperMessage message;
+    TestTask::Messages::WrapperMessage response;
+    std::shared_ptr<TestTask::Messages::WrapperMessage> res;
+    std::shared_ptr<const Data> data;
     auto request = new TestTask::Messages::RequestForSlowResponse;
-    request->set_time_in_seconds_to_sleep(12);
+
+    request->set_time_in_seconds_to_sleep(testNum);
     message.set_allocated_request_for_slow_response(request);
 
-    std::cout << message.DebugString() << "\n\n";
+    uint32_t msgSize = sizeof(message);
+    data = serializeDelimited(message);
 
-    std::shared_ptr<const Data> data = serializeDelimited<TestTask::Messages::WrapperMessage>(message);
-    char* msg = new char[data->size()];
-    for (int i = 0; i < data->size(); i++)
-    {
-        msg[i] = (*data)[i];
-    }
-    std::shared_ptr<TestTask::Messages::WrapperMessage> res = parseDelimited<TestTask::Messages::WrapperMessage>(msg, data->size());
+    size_t bytesConsumed;
+    res = parseDelimited<TestTask::Messages::WrapperMessage>(static_cast<const void*>(&*data), data->size() / 2, &bytesConsumed);
+    ASSERT_TRUE(res.get() == nullptr);
+    ASSERT_EQ(bytesConsumed, 0);
 
-    if (res)
-    {
-        TestTask::Messages::WrapperMessage response = *(res);
-        std::cout << response.DebugString() << "\n\n";
-    }
-    delete [] msg;
+    res = parseDelimited<TestTask::Messages::WrapperMessage>(static_cast<const void*>(&*data), data->size(), &bytesConsumed);
+    ASSERT_TRUE(res.get() != nullptr);
+    ASSERT_EQ(bytesConsumed, msgSize + sizeof(uint32_t));
+    response = *res;
+
+    ASSERT_TRUE(response.has_request_for_slow_response());
+    ASSERT_EQ(response.request_for_slow_response().time_in_seconds_to_sleep(), testNum);
 }
 
 
