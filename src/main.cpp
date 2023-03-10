@@ -5,7 +5,6 @@
 int main() {
     TestTask::Messages::WrapperMessage message;
     TestTask::Messages::RequestForSlowResponse* request;
-
     std::string data;
     std::shared_ptr<const Data> pointerToMsg;
     for (int i = 0; i < 5; i++)

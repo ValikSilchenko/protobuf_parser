@@ -17,7 +17,7 @@ TEST(HelpersTests, test_serialize_and_parsing_full_msg)
     request->set_time_in_seconds_to_sleep(testNum);
     message.set_allocated_request_for_slow_response(request);
 
-    uint32_t msgSize = sizeof(message);
+    uint32_t msgSize = PROTOBUF_MESSAGE_BYTE_SIZE(message);
     data = serializeDelimited(message);
 
     size_t bytesConsumed;
@@ -44,7 +44,7 @@ TEST(HelpersTests, test_serialize_and_parsing_msg_by_parts)
     request->set_time_in_seconds_to_sleep(testNum);
     message.set_allocated_request_for_slow_response(request);
 
-    uint32_t msgSize = sizeof(message);
+    uint32_t msgSize = PROTOBUF_MESSAGE_BYTE_SIZE(message);
     data = serializeDelimited(message);
 
     size_t bytesConsumed;

@@ -17,13 +17,13 @@ typedef std::shared_ptr<const Data> PointerToConstData;
 template <typename Message>
 PointerToConstData serializeDelimited(const Message& msg)
 {
-    uint32_t messageSize = sizeof(msg);
-    char msgInBytes[sizeof(uint32_t) + sizeof(msg)];
+    uint32_t messageSize = PROTOBUF_MESSAGE_BYTE_SIZE(msg);
+    char msgInBytes[sizeof(uint32_t) + messageSize];
     memcpy(msgInBytes, &messageSize, sizeof(uint32_t));
     memcpy(msgInBytes + sizeof(uint32_t), msg.SerializeAsString().c_str(), messageSize);
 
-    Data data(sizeof(uint32_t) + sizeof(msg));
-    for (int i = 0; i < sizeof(uint32_t) + sizeof(msg); i++)
+    Data data(sizeof(uint32_t) + messageSize);
+    for (int i = 0; i < sizeof(uint32_t) + messageSize; i++)
     {
         data[i] = msgInBytes[i];
     }
@@ -57,7 +57,7 @@ std::shared_ptr<Message> parseDelimited(const void* data, size_t size,
         char* message;
         char buffer[sizeof(uint32_t)];
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < sizeof(uint32_t); i++)
         {
             buffer[i] = dataVec->at(i);
         }
