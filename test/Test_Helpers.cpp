@@ -18,12 +18,13 @@ TEST(HelpersTests, test_serialize_and_parsing_full_msg)
     message.set_allocated_request_for_slow_response(request);
 
     uint32_t msgSize = PROTOBUF_MESSAGE_BYTE_SIZE(message);
+    size_t variantByteSize = google::protobuf::io::CodedOutputStream::VarintSize32(msgSize);
     data = serializeDelimited(message);
 
     size_t bytesConsumed;
     res = parseDelimited<TestTask::Messages::WrapperMessage>(static_cast<const void*>(&*data), data->size(), &bytesConsumed);
     ASSERT_TRUE(res.get() != nullptr);
-    ASSERT_EQ(bytesConsumed, msgSize + sizeof(uint32_t));
+    ASSERT_EQ(bytesConsumed, msgSize + variantByteSize);
     response = *res;
 
     ASSERT_TRUE(response.has_request_for_slow_response());
@@ -45,6 +46,7 @@ TEST(HelpersTests, test_serialize_and_parsing_msg_by_parts)
     message.set_allocated_request_for_slow_response(request);
 
     uint32_t msgSize = PROTOBUF_MESSAGE_BYTE_SIZE(message);
+    size_t variantByteSize = google::protobuf::io::CodedOutputStream::VarintSize32(msgSize);
     data = serializeDelimited(message);
 
     size_t bytesConsumed;
@@ -54,7 +56,7 @@ TEST(HelpersTests, test_serialize_and_parsing_msg_by_parts)
 
     res = parseDelimited<TestTask::Messages::WrapperMessage>(static_cast<const void*>(&*data), data->size(), &bytesConsumed);
     ASSERT_TRUE(res.get() != nullptr);
-    ASSERT_EQ(bytesConsumed, msgSize + sizeof(uint32_t));
+    ASSERT_EQ(bytesConsumed, msgSize + variantByteSize);
     response = *res;
 
     ASSERT_TRUE(response.has_request_for_slow_response());
