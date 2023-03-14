@@ -12,6 +12,9 @@ find_package(Protobuf REQUIRED)
 include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS pr.proto)
+protobuf_generate_python(PROTO_PY pr.proto)
+add_custom_target(pyProto ALL
+        DEPENDS ${PROTO_PY})
 add_executable(protobuf_parser
         src/main.cpp
         src/protobuf_parser/DelimitedMessagesStreamParser.h
