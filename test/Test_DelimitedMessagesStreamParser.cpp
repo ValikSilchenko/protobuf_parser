@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include "protobuf_parser/DelimitedMessagesStreamParser.h"
-#include "proto/pr.pb.h"
+#include "pr.pb.h"
 
 
 TEST(ParserTests, test_parsing_with_full_msg)

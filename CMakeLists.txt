@@ -7,15 +7,17 @@ set(CMAKE_CXX_STANDARD 14)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
-execute_process(COMMAND protoc --cpp_out=../src/proto -I=../ pr.proto)
+find_package(Protobuf REQUIRED)
+
+include_directories(${Protobuf_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS pr.proto)
 add_executable(protobuf_parser
         src/main.cpp
         src/protobuf_parser/DelimitedMessagesStreamParser.h
         src/protobuf_parser/helpers.hpp
-        ../src/proto/pr.pb.h
-        ../src/proto/pr.pb.cc)
-
-
+        ${PROTO_HDRS}
+        ${PROTO_SRCS})
 target_link_libraries(protobuf_parser protobuf)
 
 enable_testing()

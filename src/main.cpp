@@ -1,4 +1,4 @@
-#include "proto/pr.pb.h"
+#include "pr.pb.h"
 #include "protobuf_parser/DelimitedMessagesStreamParser.h"
 #include <iostream>
 

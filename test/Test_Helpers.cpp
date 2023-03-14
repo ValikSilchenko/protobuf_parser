@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include "protobuf_parser/helpers.hpp"
-#include "proto/pr.pb.h"
+#include "pr.pb.h"
 
 
 TEST(HelpersTests, test_serialize_and_parsing_full_msg)
