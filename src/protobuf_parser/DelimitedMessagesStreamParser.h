@@ -32,16 +32,20 @@ typename DelimitedMessagesStreamParser<MessageType>::ParsedMsgsList DelimitedMes
     addToBuffer(data);
 
     std::list<PointerToConstValue> msgsList;
-    std::shared_ptr<MessageType> parsedMsg = std::make_shared<MessageType>(MessageType());
-    size_t consumedBytes;
+    size_t consumedBytes = -1;
 
-    while (parsedMsg.get() != nullptr)
+    while (consumedBytes != 0)
     {
-        parsedMsg = parseDelimited<MessageType>(static_cast<const void*>(&m_buffer), m_buffer.size(), &consumedBytes);
-        if (parsedMsg.get())
+        msgsList.push_back(parseDelimited<MessageType>(
+                static_cast<const void*>(&m_buffer),
+                m_buffer.size(),
+                &consumedBytes)
+                );
+        if (msgsList.back() != nullptr)
         {
-            msgsList.push_back(parsedMsg);
             removeMessageFromBuffer(consumedBytes);
+        } else {
+            msgsList.pop_back();
         }
     }
 
@@ -50,17 +54,11 @@ typename DelimitedMessagesStreamParser<MessageType>::ParsedMsgsList DelimitedMes
 
 template<typename MessageType>
 void DelimitedMessagesStreamParser<MessageType>::addToBuffer(const std::string& data) {
-    for (char sym : data)
-    {
-        m_buffer.push_back(sym);
-    }
+    m_buffer.insert(m_buffer.cend(), data.cbegin(), data.cend());
 }
 
 template<typename MessageType>
 void DelimitedMessagesStreamParser<MessageType>::removeMessageFromBuffer(size_t msgSize) {
-    for (int i = 0; i < msgSize; i++)
-    {
-        m_buffer.erase(m_buffer.cbegin());
-    }
+    m_buffer.erase(m_buffer.cbegin(), m_buffer.cbegin() + msgSize);
 }
 

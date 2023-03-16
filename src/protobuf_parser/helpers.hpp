@@ -47,36 +47,33 @@ template <typename Message>
 std::shared_ptr<Message> parseDelimited(const void* data, size_t size,
                                         size_t* bytesConsumed = nullptr)
 {
-    if (data && size > sizeof(uint32_t))
+    if (data && size != 0)
     {
         auto constDataVec = static_cast<const Data*>(data);
         Data dataVec(constDataVec->begin(),constDataVec->end());
         std::shared_ptr<Message> result = std::make_shared<Message>(Message());
         std::string bytes;
-        uint32_t messageSize;
+        uint32_t messageSize = 0;
+        size_t variantByteSize = 0;
 
         uint8_t *buf = reinterpret_cast<uint8_t*>(&*(dataVec.begin()));
         google::protobuf::io::CodedInputStream stream(buf, size);
 
-        stream.ReadVarint32(&messageSize);
-        size_t variantByteSize = google::protobuf::io::CodedOutputStream::VarintSize32(messageSize);
+        if (stream.ReadVarint32(&messageSize))
+        {
+            variantByteSize = google::protobuf::io::CodedOutputStream::VarintSize32(messageSize);
+        } else {
+            messageSize = 0;
+        }
 
-        if (messageSize == 0 || size < variantByteSize + messageSize)
+        if (stream.ReadString(&bytes, messageSize) && result->ParseFromString(bytes))
         {
             if (bytesConsumed)
             {
-                *bytesConsumed = 0;
+                *bytesConsumed = variantByteSize + messageSize;
             }
-            return nullptr;
+            return result;
         }
-
-        stream.ReadString(&bytes, messageSize);
-        result->ParseFromString(bytes);
-        if (bytesConsumed)
-        {
-            *bytesConsumed = variantByteSize + messageSize;
-        }
-        return result;
     }
 
     if (bytesConsumed)
