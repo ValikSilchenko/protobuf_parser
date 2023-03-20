@@ -36,16 +36,14 @@ typename DelimitedMessagesStreamParser<MessageType>::ParsedMsgsList DelimitedMes
 
     while (consumedBytes != 0)
     {
-        msgsList.push_back(parseDelimited<MessageType>(
+        auto parsedMsg = parseDelimited<MessageType>(
                 static_cast<const void*>(&m_buffer),
                 m_buffer.size(),
-                &consumedBytes)
-                );
-        if (msgsList.back() != nullptr)
+                &consumedBytes);
+        if (parsedMsg != nullptr)
         {
+            msgsList.push_back(parsedMsg);
             removeMessageFromBuffer(consumedBytes);
-        } else {
-            msgsList.pop_back();
         }
     }
 
